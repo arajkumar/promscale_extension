@@ -58,13 +58,13 @@ PREPARE eq_test AS
 SELECT trace_id
     FROM ps_trace.span
     WHERE
-            span_tags -> 'pwlen' = '25'::jsonb
+            span_tags -> 'pwlen' = '25'
         AND resource_tags -> 'service.name' = '"generator"';
 
 /* Equals uses support function and produces correct plan */
 SELECT
     x::text LIKE '%InitPlan%',
-    x::text LIKE '% @> %'
+    x::text LIKE '%span_tags @> %'
 FROM explain_jsonb('EXECUTE eq_test') AS f(x);
 
 /* Functions, underpinning tag_map operators handle NULL arguments correctly */

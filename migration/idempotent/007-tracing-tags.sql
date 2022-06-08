@@ -98,7 +98,10 @@ $do$;
 
 DO $do$
 BEGIN
-	CREATE OPERATOR ps_trace.= (
+    -- We need to drop both the operator and the operator class if they exist
+    DROP OPERATOR CLASS IF EXISTS btree_tag_v_ops USING btree;
+    DROP OPERATOR IF EXISTS ps_trace.=(_ps_trace.tag_v, _ps_trace.tag_v) CASCADE;
+	CREATE OPERATOR ps_trace.== (
 	    FUNCTION       = ps_trace.tag_v_eq,
 	    LEFTARG        = _ps_trace.tag_v,
 	    RIGHTARG       = _ps_trace.tag_v,
@@ -109,7 +112,7 @@ BEGIN
 	);
 EXCEPTION
     WHEN SQLSTATE '42723' THEN -- operator already exists
-        EXECUTE format($q$ALTER OPERATOR ps_trace.=(_ps_trace.tag_v, _ps_trace.tag_v) OWNER TO %I$q$, current_user);
+        EXECUTE format($q$ALTER OPERATOR ps_trace.==(_ps_trace.tag_v, _ps_trace.tag_v) OWNER TO %I$q$, current_user);
 END;
 $do$;
 -------------------------------------------------------------------------------
@@ -171,7 +174,7 @@ BEGIN
 	    FUNCTION       = ps_trace.tag_v_ne,
 	    LEFTARG        = _ps_trace.tag_v,
 	    RIGHTARG       = _ps_trace.tag_v,
-	    NEGATOR        = OPERATOR(ps_trace.=),
+	    NEGATOR        = OPERATOR(ps_trace.==),
 	    RESTRICT       = neqsel,
 	    JOIN           = neqjoinsel
 	);
@@ -307,10 +310,11 @@ BEGIN
     AS
             OPERATOR        1       <  ,
             OPERATOR        2       <= ,
-            OPERATOR        3       =  ,
+            OPERATOR        3       ==  ,
             OPERATOR        4       >= ,
             OPERATOR        5       >  ,
             FUNCTION        1       _ps_trace.tag_v_cmp(_ps_trace.tag_v, _ps_trace.tag_v);
+
 EXCEPTION
     WHEN SQLSTATE '42723' THEN -- operator already exists
         EXECUTE format($q$ALTER OPERATOR CLASS btree_tag_v_ops OWNER TO %I$q$, current_user);
