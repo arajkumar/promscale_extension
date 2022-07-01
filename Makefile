@@ -5,7 +5,8 @@ ARCH ?= $(shell uname -m)
 H := \#
 # We want to be able to execute `sudo make install`, but cargo and rustc are probably both
 # not available for sudo, so we use `command -v` to only run them if they are available
-EXT_VERSION ?= $(shell command -v cargo >/dev/null && cargo pkgid | cut -d'$H' -f2 | cut -d':' -f2)
+# Note: we cut on both ':' and '@' here to support pre-1.62.0 and post 1.62.0 `cargo pkgid` output
+EXT_VERSION ?= $(shell command -v cargo >/dev/null && cargo pkgid | cut -d'$H' -f2 | cut -d':' -f2 | cut -d'@' -f2)
 RUST_VERSION ?= $(shell command -v rustc >/dev/null && rustc --version | cut -d' ' -f2)
 IMAGE_NAME ?= timescaledev/promscale-extension
 OS_NAME ?= debian
