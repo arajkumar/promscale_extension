@@ -87,7 +87,6 @@ DECLARE
     metric_table NAME;
     metric_series_table NAME;
     is_metric_view BOOLEAN;
-    check_time TIMESTAMPTZ;
     time_dimension_id INT;
     last_updated TIMESTAMPTZ;
     present_epoch BIGINT;
@@ -100,9 +99,6 @@ BEGIN
     SELECT id, table_schema, table_name, series_table, is_view
     INTO STRICT metric_id, metric_schema, metric_table, metric_series_table, is_metric_view
     FROM _prom_catalog.get_metric_table_name_if_exists(schema_name, metric_name);
-
-    SELECT older_than OPERATOR(pg_catalog.+) pg_catalog.interval '1 hour'
-    INTO check_time;
 
     startT := pg_catalog.clock_timestamp();
 
@@ -157,7 +153,7 @@ BEGIN
     -- transaction 2
         lastT := pg_catalog.clock_timestamp();
         PERFORM _prom_catalog.set_app_name(pg_catalog.format('promscale maintenance: data retention: metric %s: mark unused series', metric_name));
-        PERFORM _prom_catalog.mark_unused_series(metric_schema, metric_table, metric_series_table, older_than, check_time);
+        PERFORM _prom_catalog.mark_series_to_be_dropped_as_unused(metric_schema, metric_table, metric_series_table, older_than);
         IF log_verbose THEN
             RAISE LOG 'promscale maintenance: data retention: metric %: done marking unused series in %', metric_name, pg_catalog.clock_timestamp() OPERATOR(pg_catalog.-) lastT;
         END IF;

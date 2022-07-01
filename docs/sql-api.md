@@ -619,7 +619,7 @@ function record **_prom_catalog.get_cagg_info**(metric_schema text, metric_table
 ### _prom_catalog.get_confirmed_unused_series
 
 ```
-function bigint[] **_prom_catalog.get_confirmed_unused_series**(metric_schema text, metric_table text, series_table text, potential_series_ids bigint[], check_time timestamp with time zone)
+function bigint[] **_prom_catalog.get_confirmed_unused_series**(metric_schema text, metric_table text, series_table text, potential_series_ids bigint[], newer_than timestamp with time zone)
 ```
 ### _prom_catalog.get_default_chunk_interval
 
@@ -886,10 +886,10 @@ function boolean **_prom_catalog.lock_metric_for_maintenance**(metric_id integer
 ```
 function trigger **_prom_catalog.make_metric_table**()
 ```
-### _prom_catalog.mark_unused_series
+### _prom_catalog.mark_series_to_be_dropped_as_unused
 
 ```
-function void **_prom_catalog.mark_unused_series**(metric_schema text, metric_table text, metric_series_table text, older_than timestamp with time zone, check_time timestamp with time zone)
+function void **_prom_catalog.mark_series_to_be_dropped_as_unused**(metric_schema text, metric_table text, metric_series_table text, drop_point timestamp with time zone)
 ```
 ### _prom_catalog.match_equals
 
